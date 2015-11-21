@@ -18,6 +18,11 @@ public class ConnectionCtrl {
 		}
 	}
 	
+	public static void createClient(String serverName, int port, String selected) {
+		_client = new MainClient(serverName, port);
+		_client.select(selected);
+	}
+	
 	public static void changeIP(String ip) {
 		_client.changeServer(ip);
 	}
