@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -27,8 +28,14 @@ public class UploadHandler {
 		_printer = new PrintWriter(_writer);
 	}
 	
-	private void uploadFile(String filePath) {
-		File file = new File(filePath);
+	private void uploadFile(String filePath, String workingDir) {
+		File file = new File(workingDir + filePath);
+		try {
+			System.out.println(PRE_CONSOLE + "Checks" + file.getCanonicalPath());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     	if(file.exists()){
     		try {
     			_printer.println("file");
@@ -62,25 +69,23 @@ public class UploadHandler {
 	}
 	
 	private void createDir(String dirPath) {
-		File dir = new File(dirPath);
 		_printer.println("dir");
-		if(dir.exists() && dir.isDirectory()) {
-			_printer.println(dirPath);
-		}
+		_printer.println(dirPath);
 	}
 	
 	private void traverseDir(String current, String workingDir) {
 		if(_running) {
+			System.out.println(PRE_CONSOLE + "Working with: " + workingDir + current);
 			File file = new File(workingDir + current);
 			if(file.exists()){
 				if(file.isDirectory()) {
 					createDir(current);
 					
 					for(File sub : file.listFiles()) {
-						traverseDir(current + sub.getName(), workingDir);
+						traverseDir(current + "/" + sub.getName(), workingDir);
 					}
 				} else {
-					uploadFile(current + file.getName());
+					uploadFile(current, workingDir);
 				}
 			}
 		}		
@@ -96,4 +101,7 @@ public class UploadHandler {
 		_worker.start();
 	}
 	
+	public void stop() {
+		_running = false;
+	}
 }

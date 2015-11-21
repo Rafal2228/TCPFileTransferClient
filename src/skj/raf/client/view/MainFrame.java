@@ -8,13 +8,19 @@ import java.awt.event.ActionListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import skj.raf.client.controller.ConnectionCtrl;
+import skj.raf.client.controller.RenderCtrl;
 
 
 public class MainFrame extends JFrame{
 
+	private static final String PRE_CONSOLE = "MainFrame ";
 	private static final long serialVersionUID = 1L;
 	
 	private JLabel _ip;
@@ -46,7 +52,7 @@ public class MainFrame extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// To-Do: connection to server
+				ConnectionCtrl.connect();
 			}
 		});
 		menuPanel.add(connect);
@@ -59,7 +65,7 @@ public class MainFrame extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// To-Do: disconnection
+				ConnectionCtrl.disconnect();
 			}
 		});
 		menuPanel.add(disconnect);
@@ -72,7 +78,8 @@ public class MainFrame extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// To-Do: ip change
+				String ip = JOptionPane.showInputDialog("Plese input your ip/servername:");
+				ConnectionCtrl.changeIP(ip);
 			}
 		});
 		menuPanel.add(ip);
@@ -85,12 +92,18 @@ public class MainFrame extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// To-Do: port change
+				try {
+					int inputPort = Integer.parseInt(JOptionPane.showInputDialog("Plese input your port number:"));
+					ConnectionCtrl.changePort(inputPort);
+				} catch (Exception exception) {
+					System.out.println(PRE_CONSOLE + "Wrong port input");
+				}
+				
 			}
 		});
 		menuPanel.add(port);
 		
-		menuPanel.add(Box.createRigidArea(new Dimension(0, 50)));
+		menuPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 		
 		JButton select = new JButton("Select file/folder");
 		select.setAlignmentX(CENTER_ALIGNMENT);
@@ -98,12 +111,31 @@ public class MainFrame extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// To-Do: selection
+				JFileChooser chooser = new JFileChooser();
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				int state = chooser.showOpenDialog(null);
+				
+				if(state == JFileChooser.APPROVE_OPTION) {
+					ConnectionCtrl.select(chooser.getSelectedFile().getPath());
+				}
 			}
 		});
 		menuPanel.add(select);
 		
-		menuPanel.add(Box.createRigidArea(new Dimension(0, 50)));
+		menuPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+		
+		JButton upload = new JButton("Upload");
+		upload.setAlignmentX(CENTER_ALIGNMENT);
+		upload.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ConnectionCtrl.upload();
+			}
+		});
+		menuPanel.add(upload);
+		
+		menuPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 		
 		JButton end = new JButton("End");
 		end.setAlignmentX(CENTER_ALIGNMENT);
@@ -112,7 +144,8 @@ public class MainFrame extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// To-Do: end
+				ConnectionCtrl.disconnect();
+				RenderCtrl.end();
 			}
 		});
 		menuPanel.add(end);
@@ -173,5 +206,33 @@ public class MainFrame extends JFrame{
 	public void close() {
 		setVisible(false);
 		dispose();
+	}
+	
+	public void updateIP(String ip) {
+		_ip.setText("IP: " + ip);
+	}
+	
+	public void updatePort(int port) {
+		_port.setText("PORT: " + port);
+	}
+	
+	public void updateStatus(String status) {
+		_status.setText("Status: " + status);
+	}
+	
+	public void updateSelected(String selected) {
+		_selected.setText("Selected: " + selected);
+	}
+	
+	public void updateCurrent(String current) {
+		_current.setText("Current: " + current);
+	}
+	
+	public void updateSpeed(String speed) {
+		_speed.setText("Speed: " + speed);
+	}
+	
+	public void updateTotal(String total) {
+		_total.setText("Total: " + total);
 	}
 }
