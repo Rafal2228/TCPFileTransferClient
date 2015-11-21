@@ -25,13 +25,13 @@ public class UploadHandler {
 	public UploadHandler(InputStream reader, OutputStream writer) {
 		_reader = new BufferedReader(new InputStreamReader(reader));
 		_writer = writer;
-		_printer = new PrintWriter(_writer);
+		_printer = new PrintWriter(_writer, true);
 	}
 	
 	private void uploadFile(String filePath, String workingDir) {
 		File file = new File(workingDir + filePath);
 		try {
-			System.out.println(PRE_CONSOLE + "Checks" + file.getCanonicalPath());
+			System.out.println(PRE_CONSOLE + "Working with: " + file.getCanonicalPath());
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -42,7 +42,6 @@ public class UploadHandler {
     			int fileSize = (int)file.length(); // reads file size
         		_printer.println(fileSize);
         		_printer.println(filePath);
-        		
         		byte[] buffer = new byte[fileSize];
         		
         		BufferedInputStream fileInput = new BufferedInputStream(new FileInputStream(file));
@@ -75,7 +74,6 @@ public class UploadHandler {
 	
 	private void traverseDir(String current, String workingDir) {
 		if(_running) {
-			System.out.println(PRE_CONSOLE + "Working with: " + workingDir + current);
 			File file = new File(workingDir + current);
 			if(file.exists()){
 				if(file.isDirectory()) {

@@ -1,5 +1,8 @@
 package skj.raf.client.controller;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import skj.raf.client.model.MainClient;
 
 public class ConnectionCtrl {
@@ -7,7 +10,12 @@ public class ConnectionCtrl {
 	private static MainClient _client;
 	
 	public static void createClient() {
-		_client = new MainClient("localhost", 9999);
+		try {
+			_client = new MainClient(InetAddress.getLocalHost().getHostAddress(), 9999);
+		} catch (UnknownHostException e) {
+			_client = new MainClient("localhost", 9999);
+			e.printStackTrace();
+		}
 	}
 	
 	public static void changeIP(String ip) {

@@ -12,7 +12,7 @@ import skj.raf.client.controller.RenderCtrl.Status;
 public class MainClient {
 	
 	private static final String PRE_CONSOLE = "MainClient: ";
-	private static final int MAX_TIMEOUT = 1000;
+	private static final int MAX_TIMEOUT = 30000;
 	
 	private Socket _client;
 	private UploadHandler _uploader;
@@ -63,9 +63,9 @@ public class MainClient {
 	public void upload() {
 		if(_connected) {
 			String fileName, workingDir;
-			String[] arr = _selected.split("/");
+			File file = new File(_selected);
+			fileName = file.getName();
 			
-			fileName = arr[arr.length - 1];
 			workingDir = _selected.substring(0, _selected.length() - fileName.length());
 			
 			_uploader.upload(fileName, workingDir);
