@@ -21,7 +21,6 @@ public class MainCtrl {
         	}
 	    	ConnectionCtrl.createClient(serverName, port, selected);
     	} else {
-    		RenderCtrl.draw();
 	    	ConnectionCtrl.createClient();
     	}
     }

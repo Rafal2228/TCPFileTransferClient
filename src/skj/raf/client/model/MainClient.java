@@ -13,6 +13,7 @@ public class MainClient {
 	
 	private static final String PRE_CONSOLE = "MainClient: ";
 	private static final int MAX_TIMEOUT = 30000;
+	private static final int CHECK_FOR_DISCONNECTION = 10000;
 	
 	private Socket _client;
 	private UploadHandler _uploader;
@@ -26,6 +27,7 @@ public class MainClient {
 		_port = 0;
 		RenderCtrl.updateIP(_serverName);
 		RenderCtrl.updatePort(_port);
+		RenderCtrl.updateStatus(Status.DISCONNECTED);
 	}
 	
 	public MainClient(String serverName, int port) {
@@ -33,6 +35,7 @@ public class MainClient {
 		_port = port;
 		RenderCtrl.updateIP(serverName);
 		RenderCtrl.updatePort(port);
+		RenderCtrl.updateStatus(Status.DISCONNECTED);
 	}
 	
 	public void connect() {
@@ -42,12 +45,47 @@ public class MainClient {
 				_uploader = new UploadHandler(_client.getInputStream(), _client.getOutputStream());
 				_connected = true;
 				RenderCtrl.updateStatus(Status.CONNECTED);
+				
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						
+						while(!_client.isInputShutdown() || !_client.isOutputShutdown()) {
+							try {
+								Thread.sleep(CHECK_FOR_DISCONNECTION);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						lost();
+					}
+				}).start();
+				
 			} catch (UnknownHostException e) {
-				e.printStackTrace();
+				System.out.println(PRE_CONSOLE + "Unreachable host");
 			} catch (IOException e) {
-				e.printStackTrace();
+				if(!_connected) System.out.println(PRE_CONSOLE + "Cannot establish connection"); 
+				else System.out.println(PRE_CONSOLE + "IO exception");
 			}
 		}
+	}
+	
+	public void lost() {
+		_connected = false;
+		_uploader.stop();
+		RenderCtrl.updateStatus(Status.DISCONNECTED);
+	}
+	
+	public void disconnect() {
+		if(_connected) {
+			_connected = false;
+			_uploader.disconnect();
+			RenderCtrl.updateStatus(Status.DISCONNECTED);
+		} else {
+			System.out.println(PRE_CONSOLE + "Not connected");
+		}
+		
 	}
 	
 	public void select(String selected) {
@@ -69,16 +107,9 @@ public class MainClient {
 			workingDir = _selected.substring(0, _selected.length() - fileName.length());
 			
 			_uploader.upload(fileName, workingDir);
+		} else {
+			System.out.println(PRE_CONSOLE + "Please connect to a server	");
 		}
-	}
-	
-	public void close() {
-		if(_connected) {
-			_connected = false;
-			_uploader.stop();
-			RenderCtrl.updateStatus(Status.DISCONNECTED);
-		}
-		
 	}
 	
 	public void changeServer(String serverName) {
@@ -106,6 +137,6 @@ public class MainClient {
 	}
 	
 	public boolean isConnectable() {
-		return _port > 0 && _serverName != null;
+		return _port > 0 && _serverName != null && !_connected;
 	}
 }

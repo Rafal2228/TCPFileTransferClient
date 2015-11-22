@@ -60,7 +60,7 @@ public class RenderCtrl {
 		_mainFrame.updateSpeed(speed);
 	}
 	
-	public static void updateTotal(String total) {
-		_mainFrame.updateTotal(total);
+	public static void updateTotal(int totalDir, int totalFile) {
+		_mainFrame.updateTotal("Created: " + totalDir + " dir, Uploaded: " + totalFile + " files");
 	}
 }

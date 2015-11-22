@@ -20,7 +20,7 @@ import skj.raf.client.controller.RenderCtrl;
 
 public class MainFrame extends JFrame{
 
-	private static final String PRE_CONSOLE = "MainFrame ";
+	private static final String PRE_CONSOLE = "MainFrame: ";
 	private static final long serialVersionUID = 1L;
 	
 	private JLabel _ip;
@@ -79,7 +79,7 @@ public class MainFrame extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String ip = JOptionPane.showInputDialog("Plese input your ip/servername:");
-				ConnectionCtrl.changeIP(ip);
+				if(ip != null) ConnectionCtrl.changeIP(ip);
 			}
 		});
 		menuPanel.add(ip);
@@ -112,7 +112,7 @@ public class MainFrame extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser chooser = new JFileChooser();
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				int state = chooser.showOpenDialog(null);
 				
 				if(state == JFileChooser.APPROVE_OPTION) {

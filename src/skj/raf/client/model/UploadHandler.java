@@ -9,19 +9,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+
+import skj.raf.client.controller.RenderCtrl;
+import skj.raf.client.controller.RenderCtrl.Status;
 
 public class UploadHandler {
 
 	private static final String PRE_CONSOLE = "UploadHandler: ";
 	private static final int PACKAGE_SIZE = 4096;
 	
+	private int _totalFile;
+	private int _totalDir;
 	private BufferedReader _reader;
 	private OutputStream _writer;
 	private PrintWriter _printer;
-	private boolean _running = true;
+	private boolean _running;
 	private Thread _worker;
 	private SpeedCounter _speed;
 	
@@ -30,6 +34,9 @@ public class UploadHandler {
 		_writer = writer;
 		_printer = new PrintWriter(_writer, true);
 		_speed = new SpeedCounter();
+		_totalFile = _totalDir = 0;
+		_running = false;
+		RenderCtrl.updateTotal(_totalDir, _totalFile);
 	}
 	
 	private void uploadFile(String filePath, String workingDir) {
@@ -72,8 +79,17 @@ public class UploadHandler {
         			_printer.println(checksum.getValue());
         			_printer.flush();
         			
+        			String status = _reader.readLine();
+        			
+        			if(status.equals("CHECKSUM_OK")) {
+        				System.out.println(PRE_CONSOLE + "Checksum Ok");
+        			} else {
+        				System.out.println(PRE_CONSOLE + "Checksum error");
+        			}
+        			
         			System.out.println(PRE_CONSOLE + "Done with: " + file.getCanonicalPath());
         			fileInput.close();
+        			_totalFile++;
         		} else {
         			System.out.println(PRE_CONSOLE + "Error: " + state);
         		}
@@ -87,11 +103,13 @@ public class UploadHandler {
 	private void createDir(String dirPath) {
 		_printer.println("dir");
 		_printer.println(dirPath);
+		_totalDir++;
 	}
 	
 	private void traverseDir(String current, String workingDir) {
 		if(_running) {
 			File file = new File(workingDir + current);
+			RenderCtrl.updateCurrent(current);
 			if(file.exists()){
 				if(file.isDirectory()) {
 					createDir(current);
@@ -103,19 +121,33 @@ public class UploadHandler {
 					uploadFile(current, workingDir);
 				}
 			}
-		}		
+			RenderCtrl.updateTotal(_totalDir, _totalFile);
+		} else {
+			_printer.println("close");
+		}
 	}
 	
 	public void upload(final String selected, final String workingDir) {
+		_running = true;
 		_worker = new Thread(new Runnable() {
 			public void run() {
 				_speed.start();
+				RenderCtrl.updateStatus(Status.UPLOADING);
 				traverseDir(selected, workingDir);
+				RenderCtrl.updateStatus(Status.CONNECTED);
 				_speed.end();
 			}
 		});
 		
 		_worker.start();
+	}
+	
+	public void disconnect() {
+		if(_running) stop();
+		else {
+			_printer.println("close");
+			_printer.flush();
+		}
 	}
 	
 	public void stop() {

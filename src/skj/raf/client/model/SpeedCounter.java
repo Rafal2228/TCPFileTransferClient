@@ -50,6 +50,7 @@ public class SpeedCounter {
 			_uploading = true;
 			_startDate = new Date();
 			_updateDate = _startDate;
+			RenderCtrl.updateSpeed("init...");
 		}
 	}
 	
@@ -58,6 +59,7 @@ public class SpeedCounter {
 		_transfered = 0;
 		_prefix = 0;
 		_postfix = Multiply.KILO;
+		RenderCtrl.updateSpeed("done");
 	}
 	
 	public void updateSpeed(int block) {

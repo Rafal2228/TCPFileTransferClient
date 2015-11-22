@@ -36,7 +36,7 @@ public class ConnectionCtrl {
 	}
 	
 	public static void disconnect() {
-		_client.close();
+		_client.disconnect();
 	}
 	
 	public static void select(String selected) {
